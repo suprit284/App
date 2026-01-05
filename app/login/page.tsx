@@ -1,0 +1,164 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import Link from 'next/link';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
+import { z } from 'zod';
+
+// Define TypeScript interface
+type LoginFormData = {
+  email: string;
+  password: string;
+};
+
+// Schema definition
+const loginSchema = z.object({  
+  email: z.string().email("Email is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [loginStatus, setLoginStatus] = useState("");
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    }
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    console.log('📤 Sending login request with data:', data);
+    
+    try {
+      const res = await axios.post("http://localhost:3046/api/v1/login", data, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('✅ Login successful:', res.data);
+      
+      // Success case
+      setLoginStatus(res.data.message);
+      alert('Login successful!');
+      
+      // Store token for future requests
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      
+      setTimeout(() => {
+        router.push("/profile");
+      }, 3000);
+      
+      reset();
+      
+    } catch (e: any) {
+      console.log('❌ Login error:', e);
+      console.log('Error response:', e.response);
+      
+      // Handle different error cases
+      if (e.response) {
+        console.log('Error status:', e.response.status);
+        console.log('Error data:', e.response.data);
+        
+        switch (e.response.status) {
+          case 404:
+            setLoginStatus(e.response.data.message || 'User not found');
+            break;
+          case 401:
+            setLoginStatus(e.response.data.message || 'Wrong password');
+            break;
+          case 400:
+            setLoginStatus(e.response.data.message || 'Bad request');
+            break;
+          case 500:
+            setLoginStatus('Server error. Please try again.');
+            break;
+          default:
+            setLoginStatus(e.response.data?.message || e.response.data);
+        }
+      } else if (e.request) {
+        console.log('No response received:', e.request);
+        setLoginStatus('No response from server. Check if backend is running.');
+      } else {
+        console.log('Request setup error:', e.message);
+        setLoginStatus('Network error. Please check your connection.');
+      }
+    }
+  };
+  
+  useEffect(() => {
+    let cleanup = setTimeout(() => setLoginStatus(""), 2000);
+    return () => {
+      clearTimeout(cleanup);
+    };
+  }, [loginStatus]);
+
+  return (
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
+      <div className='border border-white/30 bg-white/10 backdrop-blur-sm w-full max-w-md rounded-xl flex flex-col items-center justify-center gap-6 p-6 sm:p-8 shadow-2xl'>
+        <h1 className='font-semibold text-2xl sm:text-3xl text-white text-center'>Login</h1>
+        <div className="w-full">
+          <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
+            <div>
+              <input 
+                type='email' 
+                {...register('email')}
+                className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
+                placeholder='Email address'
+              />
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-300">{errors.email.message}</p>
+              )}
+            </div>
+            
+            <div>
+              <input 
+                type='password' 
+                {...register('password')}
+                className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
+                placeholder='Password'
+              />
+              {errors.password && (
+                <p className="mt-2 text-sm text-red-300">{errors.password.message}</p>
+              )}
+            </div>
+            
+            <button
+              type='submit'
+              disabled={isSubmitting}
+              className='rounded-lg h-12 px-4 w-full cursor-pointer bg-amber-400 hover:bg-amber-500 disabled:bg-amber-300 text-gray-900 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-300'
+            >
+              {isSubmitting ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+          
+          <p className='text-white text-center mt-4 text-sm sm:text-base'>
+            Haven't signed up?  
+            <Link 
+              href="/signup" // Changed to "/signup" (assuming your signup page is at /signup)
+              className='text-amber-300 hover:text-amber-200 hover:underline ml-1 transition-colors duration-200'
+            >
+              <u>Sign up</u>
+            </Link>
+          </p>
+        </div>
+
+        {loginStatus && (
+          <p className="text-green-300 text-center text-sm sm:text-base mt-2">{loginStatus}</p>
+        )}
+      </div>
+    </div>
+  );
+}
