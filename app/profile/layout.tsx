@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Leftbar from '../components/Leftbar';
+  
+
 
 
 export default function ProfileLayout({
@@ -10,6 +12,8 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+    
   const router = useRouter();
   const pathname = usePathname();
   

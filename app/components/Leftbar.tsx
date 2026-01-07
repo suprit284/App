@@ -9,19 +9,23 @@ import {
   X, 
   Menu, 
   Search, 
-  LogOut, 
-  Users,
-  Home
+  LogOut,
 } from 'lucide-react';
 
 interface LeftbarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  user: {
+  user?: {
     name: string;
     avatar: string;
     email?: string;
   };
+}
+
+interface CurrentUser {
+  name: string;
+  email: string;
+  avatar?: string;
 }
 
 const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
@@ -29,24 +33,115 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(0);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  
   const router = useRouter();
 
-  useEffect(() => {
-    // Client-side only code
-    setWindowWidth(window.innerWidth);
-    
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      if (window.innerWidth >= 1024) {
-        setIsCollapsed(activeTab === 'messages');
-      } else {
-        setIsCollapsed(false);
-      }
-    };
+  // Fetch user data
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      // Get user from localStorage or API
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.email) {
+          // Fetch fresh user data from API
+          const response = await fetch(`http://localhost:3046/api/v1/user/${parsedUser.email}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.user) {
+              setCurrentUser({
+                name: data.user.name || parsedUser.name || 'User',
+                email: data.user.email || parsedUser.email,
+                avatar: data.user.avatar || parsedUser.avatar
+              });
+            } else {
+              // Fallback to stored user
+              setCurrentUser({
+                name: parsedUser.name || 'User',
+                email: parsedUser.email,
+                avatar: parsedUser.avatar
+              });
+            }
+          } else {
+            // Fallback to stored user
+            setCurrentUser({
+              name: parsedUser.name || 'User',
+              email: parsedUser.email,
+              avatar: parsedUser.avatar
+            });
+          }
+        }
+      } else {
+        // Try to get from cookies or session
+        const sessionId = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('session_id='))
+          ?.split('=')[1];
+        
+        if (sessionId) {
+          // You might want to create an endpoint to get user by session
+          // For now, redirect to login if no user data
+          router.push('/login');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Fallback to props user if available
+      if (user && user.name) {
+        setCurrentUser({
+          name: user.name,
+          email: user.email || 'user@example.com',
+          avatar: user.avatar
+        });
+      } else {
+        // Set default user
+        setCurrentUser({
+          name: 'User',
+          email: 'user@example.com'
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get first initial of name
+  const getInitialAvatar = (name: string) => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    
+    // Client-side only code
+    if (typeof window !== 'undefined') {
+      setWindowWidth(window.innerWidth);
+      
+      const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+        if (window.innerWidth >= 1024) {
+          setIsCollapsed(activeTab === 'messages');
+        } else {
+          setIsCollapsed(false);
+        }
+      };
+
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -76,6 +171,40 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
     }
   ];
 
+  const logoutUser = async () => {
+    try {
+      const sessionId = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('session_id='))
+        ?.split('=')[1];
+      
+      const response = await fetch('http://localhost:3046/api/v1/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId: sessionId })
+      });
+      
+      const data = await response.json();
+      console.log('Logout response:', data);
+      
+      document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('user');
+      setCurrentUser(null);
+      alert("Logout successful!");
+      window.location.href = '/login';
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('user');
+      setCurrentUser(null);
+      window.location.href = '/login';
+    }
+  };
+
   const settingsItems = [
     {
       id: 'logout',
@@ -83,10 +212,8 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       icon: LogOut,
       description: 'Sign out of your account',
       onClick: () => {
-        console.log('Logout clicked');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/login');
+        logoutUser();
+        setOpenSettings(false);
       },
       isDestructive: true
     }
@@ -113,7 +240,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       {/* Backdrop for Mobile */}
       {isMobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0  bg-opacity-20 z-30 transition-opacity duration-200"
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-20 z-30 transition-opacity duration-200"
           onClick={() => setIsMobileOpen(false)}
         ></div>
       )}
@@ -149,21 +276,38 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
         {/* User Profile */}
         <div className={`p-4 border-b border-blue-400/20 ${isCollapsed ? 'px-3 py-4' : ''}`}>
           <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center space-x-3'}`}>
-            <div className={`${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'} bg-white/20 rounded-full flex items-center justify-center overflow-hidden`}>
-              {user?.avatar ? (
+            <div className={`${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'} bg-white/30 rounded-full flex items-center justify-center overflow-hidden`}>
+              {loading ? (
+                <div className="animate-pulse">
+                  <User className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} text-white/50`} />
+                </div>
+              ) : currentUser?.avatar ? (
                 <img 
-                  src={user.avatar} 
-                  alt={user.name}
+                  src={currentUser.avatar} 
+                  alt={currentUser.name}
                   className={`${isCollapsed ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover`}
                 />
               ) : (
-                <User className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} text-white`} />
+                <div className={`${isCollapsed ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white/40 flex items-center justify-center`}>
+                  <span className={`${isCollapsed ? 'text-lg' : 'text-xl'} font-bold text-white`}>
+                    {getInitialAvatar(currentUser?.name || 'User')}
+                  </span>
+                </div>
               )}
             </div>
-            {!isCollapsed && (
+            {!isCollapsed && !loading && (
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-white truncate">{user?.name || 'User'}</h3>
-                <p className="text-blue-100 text-xs">Online</p>
+                <h3 className="font-semibold text-white truncate">{currentUser?.name || 'User'}</h3>
+                <p className="text-blue-100 text-xs truncate">
+                  {currentUser?.email || 'user@example.com'}
+                </p>
+                <p className="text-blue-200 text-xs mt-0.5">Online</p>
+              </div>
+            )}
+            {!isCollapsed && loading && (
+              <div className="flex-1 min-w-0">
+                <div className="h-4 bg-white/20 rounded animate-pulse mb-2"></div>
+                <div className="h-3 bg-white/20 rounded animate-pulse w-3/4"></div>
               </div>
             )}
           </div>
@@ -226,30 +370,50 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
 
       {/* Settings Popup */}
       {openSettings && (
-  <div className="fixed inset-0 z-50 flex items-start justify-center lg:justify-start pt-20 lg:pt-20 lg:pl-64 px-4">
-    {/* Backdrop - CHANGE THIS LINE: */}
-    <div 
-      className="fixed inset-0 bg-black/20 transition-opacity duration-200"
-      onClick={() => setOpenSettings(false)}
-    ></div>
+        <div className="fixed inset-0 z-50 flex items-start justify-center lg:justify-start pt-20 lg:pt-20 lg:pl-64 px-4">
+          <div 
+            className="fixed inset-0 bg-black/20 transition-opacity duration-200"
+            onClick={() => setOpenSettings(false)}
+          ></div>
           
           <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-in slide-in-from-top-5 lg:slide-in-from-left-5 duration-200 lg:ml-4">
             <div className="p-4 border-b border-gray-100">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
-                  {user?.avatar ? (
+                  {loading ? (
+                    <div className="animate-pulse">
+                      <User className="w-5 h-5 text-white/50" />
+                    </div>
+                  ) : currentUser?.avatar ? (
                     <img 
-                      src={user.avatar} 
-                      alt={user.name}
+                      src={currentUser.avatar} 
+                      alt={currentUser.name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center">
+                      <span className="text-sm font-bold text-white">
+                        {getInitialAvatar(currentUser?.name || 'User')}
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{user?.name || 'User'}</h3>
-                  <p className="text-gray-500 text-sm truncate">{user?.email || 'user@example.com'}</p>
+                  {loading ? (
+                    <>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {currentUser?.name || 'User'}
+                      </h3>
+                      <p className="text-gray-500 text-sm truncate">
+                        {currentUser?.email || 'user@example.com'}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
