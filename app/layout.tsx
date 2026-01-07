@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ChatFlow - Next.js',
-  description: 'Real-time chat application',
+  title: 'Assignment App - Next.js',
+  description: 'Application',
 };
 
 export default function RootLayout({

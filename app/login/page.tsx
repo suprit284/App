@@ -8,6 +8,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { z } from 'zod';
 
+// Dynamically import Lucide icons
+import dynamic from 'next/dynamic';
+const LinkedinIcon = dynamic(() => import('lucide-react').then(mod => mod.Linkedin), { ssr: false });
+const GithubIcon = dynamic(() => import('lucide-react').then(mod => mod.Github), { ssr: false });
+const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart), { ssr: false });
+
 // Define TypeScript interface
 type LoginFormData = {
   email: string;
@@ -106,59 +112,123 @@ export default function LoginPage() {
   }, [loginStatus]);
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
-      <div className='border border-white/30 bg-white/10 backdrop-blur-sm w-full max-w-md rounded-xl flex flex-col items-center justify-center gap-6 p-6 sm:p-8 shadow-2xl'>
-        <h1 className='font-semibold text-2xl sm:text-3xl text-white text-center'>Login</h1>
-        <div className="w-full">
-          <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <input 
-                type='email' 
-                {...register('email')}
-                className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
-                placeholder='Email address'
-              />
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-300">{errors.email.message}</p>
-              )}
-            </div>
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen flex flex-col items-center justify-between p-4">
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center flex-1 w-full">
+        <div className='border border-white/30 bg-white/10 backdrop-blur-sm w-full max-w-md rounded-xl flex flex-col items-center justify-center gap-6 p-6 sm:p-8 shadow-2xl'>
+          <h1 className='font-semibold text-2xl sm:text-3xl text-white text-center'>Login</h1>
+          <div className="w-full">
+            <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
+              <div>
+                <input 
+                  type='email' 
+                  {...register('email')}
+                  className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
+                  placeholder='Email address'
+                />
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-300">{errors.email.message}</p>
+                )}
+              </div>
+              
+              <div>
+                <input 
+                  type='password' 
+                  {...register('password')}
+                  className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
+                  placeholder='Password'
+                />
+                {errors.password && (
+                  <p className="mt-2 text-sm text-red-300">{errors.password.message}</p>
+                )}
+              </div>
+              
+              <button
+                type='submit'
+                disabled={isSubmitting}
+                className='rounded-lg h-12 px-4 w-full cursor-pointer bg-amber-400 hover:bg-amber-500 disabled:bg-amber-300 text-gray-900 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-300'
+              >
+                {isSubmitting ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
             
-            <div>
-              <input 
-                type='password' 
-                {...register('password')}
-                className='rounded-lg h-12 px-4 w-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50'  
-                placeholder='Password'
-              />
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-300">{errors.password.message}</p>
-              )}
-            </div>
-            
-            <button
-              type='submit'
-              disabled={isSubmitting}
-              className='rounded-lg h-12 px-4 w-full cursor-pointer bg-amber-400 hover:bg-amber-500 disabled:bg-amber-300 text-gray-900 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-300'
-            >
-              {isSubmitting ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-          
-          <p className='text-white text-center mt-4 text-sm sm:text-base'>
-            Haven't signed up?  
-            <Link 
-              href="/signup" // Changed to "/signup" (assuming your signup page is at /signup)
-              className='text-amber-300 hover:text-amber-200 hover:underline ml-1 transition-colors duration-200'
-            >
-              <u>Sign up</u>
-            </Link>
-          </p>
-        </div>
+            <p className='text-white text-center mt-4 text-sm sm:text-base'>
+              Haven't signed up?  
+              <Link 
+                href="/signup"
+                className='text-amber-300 hover:text-amber-200 hover:underline ml-1 transition-colors duration-200'
+              >
+                <u>Sign up</u>
+              </Link>
+            </p>
+          </div>
 
-        {loginStatus && (
-          <p className="text-green-300 text-center text-sm sm:text-base mt-2">{loginStatus}</p>
-        )}
+          {loginStatus && (
+            <p className="text-green-300 text-center text-sm sm:text-base mt-2">{loginStatus}</p>
+          )}
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full max-w-md mt-8 mb-4">
+        <div className="border-t border-white/20 pt-6">
+          <div className="flex flex-col items-center space-y-4">
+            
+            {/* Developer Info */}
+            <div className="text-center">
+              <p className="text-white/80 text-sm mb-2">
+                Developed with <HeartIcon className="inline-block w-4 h-4 text-red-400 fill-red-400 mx-1" /> by
+              </p>
+              <p className="text-white font-bold text-lg">Suprit Kolse</p>
+              <p className="text-white/70 text-sm mt-1">Full Stack Developer</p>
+            </div>
+            
+            {/* Social Links */}
+            <div className="flex items-center justify-center space-x-6">
+              
+              {/* LinkedIn */}
+              <a 
+                href="https://www.linkedin.com/in/suprit-kolse-17a498205/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group flex items-center space-x-2 text-white hover:text-blue-200 transition-colors duration-200"
+              >
+                <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                  <LinkedinIcon className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium">LinkedIn</p>
+                  <p className="text-xs text-white/70 group-hover:text-white/90">suprit-kolse</p>
+                </div>
+              </a>
+              
+              {/* GitHub */}
+              <a 
+                href="https://github.com/suprit284/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group flex items-center space-x-2 text-white hover:text-purple-200 transition-colors duration-200"
+              >
+                <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                  <GithubIcon className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium">GitHub</p>
+                  <p className="text-xs text-white/70 group-hover:text-white/90">suprit-kolse</p>
+                </div>
+              </a>
+              
+            </div>
+            
+           
+            
+            {/* Copyright */}
+            <p className="text-white/60 text-xs text-center mt-4 pt-4 border-t border-white/10">
+              © {new Date().getFullYear()} Suprit Kolse. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

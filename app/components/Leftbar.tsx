@@ -158,12 +158,6 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       path: '/profile'
     },
     {
-      id: 'messages',
-      label: 'Messages',
-      icon: MessageCircle,
-      path: '/profile/messages'
-    },
-    {
       id: 'search',
       label: 'Search',
       icon: Search,
@@ -267,8 +261,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
             <h1 className="text-xl font-bold text-center">C</h1>
           ) : (
             <>
-              <h1 className="text-2xl font-bold">ChatFlow</h1>
-              <p className="text-blue-100 text-sm mt-1">Real-time messaging</p>
+              <h1 className="text-2xl font-bold">App</h1>
             </>
           )}
         </div>
