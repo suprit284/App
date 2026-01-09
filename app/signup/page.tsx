@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
+import { toast, Toaster } from 'react-hot-toast';
 
 // Dynamically import Lucide icons
 const LinkedinIcon = dynamic(() => import('lucide-react').then(mod => mod.Linkedin), { ssr: false });
@@ -59,7 +60,7 @@ export default function SignUpPage() {
     
     try {
       const res = await axios.post("http://localhost:3046/api/v1/signup", data);
-      console.log('✅ Signup successful:', res.data);
+      
       
       setSignUpStatus("Account created successfully! Redirecting to login...");
       

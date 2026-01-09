@@ -36,6 +36,7 @@ interface SearchUserProps {
 // Filter types
 type FilterType = 'all' | 'online' | 'recent';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
 // User Card Component
 const UserCard = ({ user, onStartChat }: { user: User; onStartChat: (user: User) => void }) => {
   const router = useRouter();
@@ -116,19 +117,8 @@ const UserCard = ({ user, onStartChat }: { user: User; onStartChat: (user: User)
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleViewProfile}
-            className="px-3 py-2 text-sm border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
-          >
-            View Profile
-          </button>
-          <button
-            onClick={() => onStartChat(user)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-md hover:scale-105 transition-all duration-200"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Message
-          </button>
+          
+         
         </div>
       </div>
     </div>
@@ -158,7 +148,56 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
     avatar: '',
     isOnline: true
   };
-
+  useEffect(() => {
+  
+  
+  
+  // Check if Search page has code that overwrites localStorage
+  const storedUser = localStorage.getItem('user');
+  if (storedUser && storedUser !== 'undefined') {
+    try {
+      JSON.parse(storedUser);
+      console.log('✅ User data is valid JSON');
+    } catch {
+      console.log('❌ User data is NOT valid JSON');
+    }
+  }
+  
+  // After Search page operations
+  // console.log('After Search page operations:', localStorage.getItem('user'));
+}, []);
+  useEffect(() => {
+  
+          
+      const verifyAuth = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/v1/middleware`, {
+            method: 'POST',
+            credentials: 'include', // Sends cookies
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (response.status === 200) {
+            // User is authenticated, allow rendering
+            const data = await response.json();
+            console.log('Authenticated:', data.user);
+            
+          } else {
+            // Not authenticated, redirect to login
+            router.push('/login');
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          router.push('/login');
+        }
+      };
+      
+  
+      
+      verifyAuth();
+    }, [router]);
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -306,44 +345,9 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
           {/* Filter Button */}
           {searchResults.length > 0 && (
             <div className="relative">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-200"
-              >
-                <FilterIcon className="w-4 h-4" />
-                Filter
-              </button>
               
-              {/* Filter Dropdown */}
-              {showFilters && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                  <div className="p-2">
-                    <div className="text-xs font-semibold text-gray-500 px-2 py-1">
-                      Filter by:
-                    </div>
-                    {(['all', 'online', 'recent'] as FilterType[]).map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => handleFilterChange(filter)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded text-sm ${
-                          activeFilter === filter 
-                            ? 'bg-blue-50 text-blue-600' 
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        <span>
-                          {filter === 'all' && 'All Users'}
-                          {filter === 'online' && 'Online Only'}
-                          {filter === 'recent' && 'Recently Joined'}
-                        </span>
-                        {activeFilter === filter && (
-                          <CheckIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              
+              
             </div>
           )}
         </div>
@@ -357,7 +361,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
             placeholder="Search by name, username, or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-12 py-3 bg-white border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all text-lg"
+            className="w-full pl-12 pr-12 py-3 bg-white border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent text-black transition-all text-lg"
             autoFocus
           />
           {searchQuery && (
@@ -463,7 +467,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
               Connect with People
             </h3>
             <p className="text-gray-600 max-w-lg mx-auto mb-8 text-lg">
-              Find users by their name, username, or email address to start conversations and build connections.
+              Find users by their name, username, or email address 
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">

@@ -44,39 +44,37 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('📤 Sending login request with data:', data);
+    
     
     try {
       const res = await axios.post("http://localhost:3046/api/v1/login", data, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true //
       });
       
-      console.log('✅ Login successful:', res.data);
+      
       
       // Success case
       setLoginStatus(res.data.message);
-      alert('Login successful!');
+    //   toast.success("Login successful!");
       
-      // Store token for future requests
-      localStorage.setItem('token', res.data.token);
+      
       localStorage.setItem('user', JSON.stringify(res.data.user));
+
       
-      setTimeout(() => {
-        router.push("/profile");
-      }, 3000);
+    
       
+       setTimeout(() => {
+      router.push("/profile");
+    }, 5000);
       reset();
       
     } catch (e: any) {
-      console.log('❌ Login error:', e);
-      console.log('Error response:', e.response);
+   
       
       // Handle different error cases
       if (e.response) {
-        console.log('Error status:', e.response.status);
-        console.log('Error data:', e.response.data);
+   
         
         switch (e.response.status) {
           case 404:
@@ -95,10 +93,10 @@ export default function LoginPage() {
             setLoginStatus(e.response.data?.message || e.response.data);
         }
       } else if (e.request) {
-        console.log('No response received:', e.request);
+        
         setLoginStatus('No response from server. Check if backend is running.');
       } else {
-        console.log('Request setup error:', e.message);
+        
         setLoginStatus('Network error. Please check your connection.');
       }
     }

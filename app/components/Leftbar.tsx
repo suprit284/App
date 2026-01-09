@@ -11,7 +11,7 @@ import {
   Search, 
   LogOut,
 } from 'lucide-react';
-
+import { toast, Toaster } from 'react-hot-toast';
 interface LeftbarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -182,13 +182,15 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       });
       
       const data = await response.json();
-      console.log('Logout response:', data);
+      
       
       document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       localStorage.removeItem('user');
       setCurrentUser(null);
-      alert("Logout successful!");
+      toast.success("Logout successful!");
+      setTimeout(() => {
       window.location.href = '/login';
+    }, 1500);
       
     } catch (error) {
       console.error('Logout error:', error);
@@ -221,23 +223,27 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
     setIsMobileOpen(false);
   };
 
+
+  
+
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg"
+        className="lg:hidden fixed top-4 right-4 z-40 p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg"
       >
         <Menu className="w-6 h-6" />
       </button>
 
       {/* Backdrop for Mobile */}
       {isMobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-20 z-30 transition-opacity duration-200"
-          onClick={() => setIsMobileOpen(false)}
-        ></div>
-      )}
+  <div 
+    className="lg:hidden fixed inset-y-0 left-0 bg-black/20 bg-opacity-20 z-30 transition-opacity duration-200"
+    style={{ width: '100%' }} // Or adjust width as needed
+    onClick={() => setIsMobileOpen(false)}
+  ></div>
+)}
 
       {/* Sidebar */}
       <div className={`
