@@ -1,7 +1,8 @@
-// lib/userApi.ts
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+
 export const getUser = async (email: string) => {
   try {
-    const response = await fetch(`http://localhost:3046/api/v1/user/${email}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/user/${email}`, {
       method: 'GET',
       credentials: 'include', // Send cookies for authentication
       headers: {

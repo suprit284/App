@@ -15,6 +15,8 @@ interface User {
   createdAt?: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+
 export const useCurrentUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export const useCurrentUser = () => {
       const { email } = JSON.parse(storedUser);
       
       // Call API to get full user data
-      const response = await fetch(`http://localhost:3046/api/v1/user/${email}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/user/${email}`, {
         credentials: 'include',
       });
       

@@ -23,6 +23,7 @@ type SignUpFormData = {
   password: string;
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
 // Schema definition
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters"),
@@ -59,7 +60,7 @@ export default function SignUpPage() {
     setSignUpStatus("");
     
     try {
-      const res = await axios.post("http://localhost:3046/api/v1/signup", data);
+      const res = await axios.post(`${API_BASE_URL}/api/v1/signup`, data);
       
       
       setSignUpStatus("Account created successfully! Redirecting to login...");

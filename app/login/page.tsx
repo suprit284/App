@@ -20,6 +20,8 @@ type LoginFormData = {
   password: string;
 };
 
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
 // Schema definition
 const loginSchema = z.object({  
   email: z.string().email("Email is required"),
@@ -47,7 +49,7 @@ export default function LoginPage() {
     
     
     try {
-      const res = await axios.post("http://localhost:3046/api/v1/login", data, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/login`, data, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true //
       });

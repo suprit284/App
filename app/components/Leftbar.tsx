@@ -28,6 +28,8 @@ interface CurrentUser {
   avatar?: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+
 const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
   const [openSettings, setOpenSettings] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -49,7 +51,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
         const parsedUser = JSON.parse(storedUser);
         if (parsedUser && parsedUser.email) {
           // Fetch fresh user data from API
-          const response = await fetch(`http://localhost:3046/api/v1/user/${parsedUser.email}`, {
+          const response = await fetch(`${API_BASE_URL}/api/v1/user/${parsedUser.email}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -172,7 +174,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
         .find(row => row.startsWith('session_id='))
         ?.split('=')[1];
       
-      const response = await fetch('http://localhost:3046/api/v1/logout', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: {

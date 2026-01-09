@@ -38,7 +38,7 @@ type FilterType = 'all' | 'online' | 'recent';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
 // User Card Component
-const UserCard = ({ user, onStartChat }: { user: User; onStartChat: (user: User) => void }) => {
+const UserCard = ({ user }: { user: User;  }) => {
   const router = useRouter();
   
   const formatDate = (dateString: string) => {
@@ -50,10 +50,7 @@ const UserCard = ({ user, onStartChat }: { user: User; onStartChat: (user: User)
     });
   };
 
-  const handleViewProfile = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/profile/${user.id}`);
-  };
+ 
 
   return (
     <div className="bg-white rounded-xl border border-blue-100 p-4 hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -253,7 +250,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
     setError('');
 
     try {
-      const response = await axios.get(`http://localhost:3046/api/v1/users/search`, {
+      const response = await axios.get(`${API_BASE_URL}/api/v1/users/search`, {
         params: { q: query },
         withCredentials: true // Important for sending cookies
       });
@@ -288,19 +285,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
     }
   };
 
-  const handleStartChat = (user: User) => {
-    if (onStartChat) {
-      onStartChat(user);
-    } else {
-      // Navigate to messages with the selected user
-      router.push(`/profile/messages?userId=${user.id}&name=${encodeURIComponent(user.name)}`);
-    }
-    
-    // Clear search after selecting
-    setSearchQuery('');
-    setSearchResults([]);
-    setFilteredResults([]);
-  };
+  
 
   const clearSearch = () => {
     setSearchQuery('');
@@ -430,7 +415,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
                 <UserCard 
                   key={user.id}
                   user={user}
-                  onStartChat={handleStartChat}
+                  
                 />
               ))}
             </div>
