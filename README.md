@@ -5,7 +5,6 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
-![License](https://img.shields.io/badge/License-MIT-blue)
 
 ## 📋 Overview
 
