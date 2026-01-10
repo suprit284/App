@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔐 SecureAuth Manager
 
-## Getting Started
+> A full-stack, secure authentication demo application built with Next.js 16, TypeScript, and MongoDB Atlas.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📋 Overview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+SecureAuth Manager is a production-ready authentication system demonstrating enterprise-grade security practices, built as a technical assignment. The application showcases secure user authentication, CRUD operations, and modern deployment strategies.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Live Demo:** [View Live Application](https://assignmentapp-ivory.vercel.app)  
+**Documentation:** [View Full Documentation](/docs/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✨ Features
 
-## Learn More
+### 🔐 Security & Authentication
+- **JWT-based Authentication** with refresh token rotation
+- **Secure Password Storage** using bcrypt hashing
+- **XSS & CSRF Protection** with input sanitization and token validation
+- **Protected Routes** with role-based access control
+- **HTTP Security Headers** (CSP, HSTS, X-Frame-Options)
 
-To learn more about Next.js, take a look at the following resources:
+### 👥 User Management
+- **Complete CRUD Operations** for user profiles
+- **User Search** by name, username, or email
+- **Profile Management** with real-time validation
+- **Session Management** with automatic expiry
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🎨 User Interface
+- **Responsive Design** using Tailwind CSS (mobile-first)
+- **Modern Components** with shadcn/ui and Radix UI
+- **Accessibility Compliant** (WCAG 2.1 AA)
+- **Real-time Form Validation** with Zod schemas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🚀 Deployment & DevOps
+- **Multi-Platform Deployment** (Vercel + Railway)
+- **CI/CD Pipeline** with GitHub Actions
+- **Automated Testing** and quality checks
+- **Production Monitoring** with error tracking
 
-## Deploy on Vercel
+## 🏗️ Architecture
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### **System Architecture Overview**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | **Next.js 16 (App Router)** | Full-stack React framework with server-side rendering |
+| **Frontend** | **TypeScript** | Type safety and improved developer experience |
+| **Frontend** | **Tailwind CSS + shadcn/ui** | Utility-first styling with accessible components |
+| **Backend** | **Next.js API Routes + Node.js** | Serverless API endpoints with Node.js runtime |
+| **Database** | **MongoDB Atlas (NoSQL)** | Cloud-based document database for user data |
+| **Authentication** | **JWT + bcrypt + HTTP cookies** | Secure token-based authentication system |
+| **Hosting** | **Vercel (Frontend) + Railway (Backend)** | Multi-platform cloud deployment strategy |
+| **CI/CD** | **GitHub Actions** | Automated testing and deployment pipeline |
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- Next.js 16 with App Router
+- TypeScript for type safety
+- Tailwind CSS for styling
+- shadcn/ui + Radix UI components
+- React Hook Form + Zod validation
+
+**Backend:**
+- Next.js API Routes
+- Node.js runtime
+- JWT for authentication
+- bcrypt for password hashing
+- MongoDB Atlas + Mongoose ODM
+
+**DevOps & Tools:**
+- Vercel for frontend hosting
+- Railway for backend hosting
+- GitHub Actions for CI/CD
+- ESLint + Prettier for code quality
+- Husky for git hooks
