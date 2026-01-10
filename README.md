@@ -1,4 +1,4 @@
-# 🔐 SecureAuth Manager
+# 🔐 App
 
 > A full-stack, secure authentication demo application built with Next.js 16, TypeScript, and MongoDB Atlas.
 
@@ -9,7 +9,7 @@
 
 ## 📋 Overview
 
-SecureAuth Manager is a production-ready authentication system demonstrating enterprise-grade security practices, built as a technical assignment. The application showcases secure user authentication, CRUD operations, and modern deployment strategies.
+This project is a production-ready authentication system demonstrating enterprise-grade security practices, built as a technical assignment. The application showcases secure user authentication, CRUD operations, and modern deployment strategies.
 
 **Live Demo:** [View Live Application](https://assignmentapp-ivory.vercel.app)  
 **Documentation:** [View Full Documentation](/docs/)
