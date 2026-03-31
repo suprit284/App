@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
-import { toast, Toaster } from 'react-hot-toast';
+
 
 // Dynamically import Lucide icons
 const LinkedinIcon = dynamic(() => import('lucide-react').then(mod => mod.Linkedin), { ssr: false });
@@ -23,7 +23,7 @@ type SignUpFormData = {
   password: string;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+const API_BASE_URL =  'http://localhost:3046'; //add back the env variables 
 // Schema definition
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters"),

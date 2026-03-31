@@ -15,7 +15,7 @@ interface User {
   createdAt?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+const API_BASE_URL =  'http://localhost:3046';
 
 export const useCurrentUser = () => {
   const [user, setUser] = useState<User | null>(null);

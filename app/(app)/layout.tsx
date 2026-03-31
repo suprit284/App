@@ -22,15 +22,12 @@ export default function ProfileLayout({
   const [activeTab, setActiveTab] = useState(currentTab);
   
   // Mock user data (replace with actual user from context/store)
-  const user = {
-    name: 'John Doe',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    email: 'john@example.com'
-  };
+
 
   // Update activeTab when URL changes
   useEffect(() => {
-    const tab = pathname.split('/').pop();
+    const segments = pathname.split('/').filter(Boolean);
+  const tab = segments[0]; 
     if (tab) {
       setActiveTab(tab);
     }
@@ -39,7 +36,7 @@ export default function ProfileLayout({
   // Handle tab change with navigation
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    router.push(`/profile/${tab}`);
+    router.push(`/${tab}`);
   };
 
   return (
@@ -48,7 +45,7 @@ export default function ProfileLayout({
       <Leftbar 
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        user={user}
+        
       />
       
       {/* Main Content - Renders children (page.tsx) */}

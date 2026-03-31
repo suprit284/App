@@ -36,7 +36,7 @@ interface SearchUserProps {
 // Filter types
 type FilterType = 'all' | 'online' | 'recent';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+const API_BASE_URL =   'http://localhost:3046';
 // User Card Component
 const UserCard = ({ user }: { user: User;  }) => {
   const router = useRouter();
@@ -50,10 +50,21 @@ const UserCard = ({ user }: { user: User;  }) => {
     });
   };
 
+  const handleMessageClick = () => {
+    // Navigate to chat with this user
+    console.log("🔵 Attempting to navigate to user:", user.id)
+    router.push(`/message/${user.id}`);
+    
+    // Or you could:
+    // 1. Open a chat modal
+    // 2. Initialize a new conversation
+    // 3. Trigger a messaging API call
+  };
+
  
 
   return (
-    <div className="bg-white rounded-xl border border-blue-100 p-4 hover:shadow-md transition-all duration-200 hover:border-blue-300">
+     <div className="bg-white rounded-xl border border-blue-100 p-4 hover:shadow-md transition-all duration-200 hover:border-blue-300">
       <div className="flex items-center justify-between">
         {/* User Info */}
         <div className="flex items-center space-x-4">
@@ -114,8 +125,25 @@ const UserCard = ({ user }: { user: User;  }) => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
+          {/* Message Button */}
+          <button
+            onClick={() => {
+              
+              handleMessageClick()
+               setTimeout(() => {
+      console.log("🔵 After 1s, URL is now:", window.location.href);
+    }, 1000);
+              
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg transition-all duration-200 hover:shadow-sm"
+            title="Send message"
+            aria-label={`Message ${user.name}`}
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="font-medium text-sm">Message</span>
+          </button>
           
-         
+          {/* You can add more buttons here if needed */}
         </div>
       </div>
     </div>
@@ -165,7 +193,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
 }, []);
   useEffect(() => {
   
-          
+          const abortController = new AbortController();
       const verifyAuth = async () => {
         try {
           const response = await fetch(`${API_BASE_URL}/api/v1/middleware`, {
@@ -194,6 +222,11 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
   
       
       verifyAuth();
+
+      return () => {
+    abortController.abort();
+    console.log('🛑 Cancelling auth check due to navigation');
+  };
     }, [router]);
   // Debounce search query
   useEffect(() => {

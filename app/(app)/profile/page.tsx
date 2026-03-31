@@ -33,7 +33,7 @@ const VALIDATION_RULES: ValidationRules = {
   maxUsernameLength: 30,
 } as const;
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3046';
+const API_BASE_URL =  'http://localhost:3046';
 
 export default function ProfilePage() {
   // State management
