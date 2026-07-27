@@ -13,14 +13,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Install Pandoc and LaTeX
+      - name: Install Pandoc, LaTeX, and Image Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic
+          sudo apt-get install -y \
+            pandoc \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-plain-generic \
+            librsvg2-bin \
+            imagemagick \
+            ghostscript
       
-      - name: Convert README to PDF
+      - name: Convert README to PDF with Image Support
         run: |
-          pandoc README.md -o README.pdf --pdf-engine=xelatex -V geometry:margin=1in
+          pandoc README.md -o README.pdf \
+            --pdf-engine=xelatex \
+            -V geometry:margin=1in \
+            --extract-media=./media \
+            --wrap=preserve
       
       - name: Upload PDF as artifact
         uses: actions/upload-artifact@v4
