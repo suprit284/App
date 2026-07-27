@@ -1,0 +1,25 @@
+name: Generate PDF from README
+
+on:
+  push:
+    branches: [ main, master ]  
+  workflow_dispatch:            
+
+jobs:
+  convert_readme:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Pandoc
+        uses: pandoc/pandoc-action@v1
+        with:
+          args: --pdf-engine=xelatex -o README.pdf README.md
+      
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: README-PDF
+          path: README.pdf
