@@ -83,7 +83,7 @@ export interface WebSocketContextType {
   isConnected: boolean;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  userStatuses: Record<string, Status>;
+
 }
 
 // ============================================
@@ -109,7 +109,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     isConnected,
     messages,
     setMessages,
-    userStatuses,
   } = useChatWebSocket();
 
   // console.log(isConnected);
@@ -127,7 +126,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       isConnected,
       messages,
       setMessages,
-      userStatuses,
+      
     }),
     [
       connect,
@@ -141,7 +140,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       isConnected,
       messages,
       setMessages,
-      userStatuses
+
     ]
   );
 
