@@ -6,12 +6,12 @@ import { useEffect } from 'react';
 
 export const useWebSocketManager = () => {
   const { connect, disconnect, isConnected } = useWebSocket();
-  const setWsConnectionStatus = useStatusStore((state) => state.setWsConnectionStatus);
+  // const setWsConnectionStatus = useStatusStore((state) => state.setWsConnectionStatus);
   
-  useEffect(() => {
-    // Update store when WebSocket connection status changes
-    setWsConnectionStatus(isConnected ? 'connected' : 'disconnected');
-  }, [isConnected]);
+  // useEffect(() => {
+  //   // Update store when WebSocket connection status changes
+  //   setWsConnectionStatus(isConnected ? 'connected' : 'disconnected');
+  // }, [isConnected]);
   
   return { connect, disconnect, isConnected };
 };
