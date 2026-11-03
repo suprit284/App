@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
-
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Dynamically import Lucide icons
 const LinkedinIcon = dynamic(() => import('lucide-react').then(mod => mod.Linkedin), { ssr: false });
@@ -23,7 +23,8 @@ type SignUpFormData = {
   password: string;
 };
 
-const API_BASE_URL =  'http://localhost:3046'; //add back the env variables 
+const API_BASE_URL = 'http://localhost:3046'; // add back the env variables 
+
 // Schema definition
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters"),
@@ -39,6 +40,13 @@ export default function SignUpPage() {
   const router = useRouter();
   const [signUpStatus, setSignUpStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    if (isMobile === false) {
+      router.replace('/login'); // Kick them out
+    }
+  }, [isMobile, router]);
 
   const {
     register,
@@ -55,13 +63,14 @@ export default function SignUpPage() {
     }
   });
 
+  
+
   const onSubmit = async (data: SignUpFormData) => {
     setIsSubmitting(true);
     setSignUpStatus("");
     
     try {
       const res = await axios.post(`${API_BASE_URL}/api/v1/signup`, data);
-      
       
       setSignUpStatus("Account created successfully! Redirecting to login...");
       
@@ -87,8 +96,11 @@ export default function SignUpPage() {
     }
   };
 
+  
+
+  // ⭐ If mobile, render the full signup page
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex flex-col">
+   ( isMobile &&  <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 w-full">
         <div className="w-full max-w-md mx-auto">
@@ -257,9 +269,6 @@ export default function SignUpPage() {
                   </a>
                 </div>
                 
-                {/* Quick Links - Desktop */}
-               
-                
                 {/* Copyright */}
                 <p className="text-white/60 text-xs text-center mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 px-4">
                   © {new Date().getFullYear()} Suprit Kolse. All rights reserved.
@@ -269,6 +278,6 @@ export default function SignUpPage() {
           </div>
         </div>
       </div>
-    </div>
+    </div> )
   );
 }

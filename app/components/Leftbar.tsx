@@ -12,6 +12,9 @@ import {
   LogOut,
 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import { getUserData } from '../(app)/message/[userId]/page';
+import axios from 'axios';
+import { useChatWebSocket } from '@/hooks/useChatWebsocket';
 
 interface LeftbarProps {
   activeTab: string;
@@ -38,7 +41,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
   const [loading, setLoading] = useState(true);
   
   const router = useRouter();
-
+  const {isConnected , disconnect} = useChatWebSocket();
   // Fetch user data
   const fetchUserData = async () => {
     try {
@@ -144,14 +147,22 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
         .find(row => row.startsWith('session_id='))
         ?.split('=')[1];
       
+      const userStr = localStorage.getItem('user');
+      let userId;
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        userId = user.id; // Now you can access the id property
+        console.log('User ID:', userId);
+      }
       await fetch(`${API_BASE_URL}/api/v1/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({ sessionId , userId })
       });
+      console.log("value for isconnected" ,isConnected);
       
       document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       localStorage.removeItem('user');
@@ -171,6 +182,8 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
     }
   };
 
+
+  
   const settingsItems = [
     {
       id: 'logout',
@@ -179,6 +192,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       description: 'Sign out of your account',
       onClick: () => {
         logoutUser();
+
         setOpenSettings(false);
       },
       isDestructive: true
@@ -208,7 +222,7 @@ const Leftbar = ({ activeTab, onTabChange, user }: LeftbarProps) => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg"
+        className="lg:hidden fixed top-4 right-4 z-40 p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg"
       >
         <Menu className="w-6 h-6" />
       </button>

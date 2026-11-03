@@ -10,9 +10,12 @@ import { z } from 'zod';
 
 // Dynamically import Lucide icons
 import dynamic from 'next/dynamic';
+import { checkIsPhone } from '@/lib/utils';
+
 const LinkedinIcon = dynamic(() => import('lucide-react').then(mod => mod.Linkedin), { ssr: false });
 const GithubIcon = dynamic(() => import('lucide-react').then(mod => mod.Github), { ssr: false });
 const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart), { ssr: false });
+const SmartphoneIcon = dynamic(() => import('lucide-react').then(mod => mod.Smartphone), { ssr: false }); // ⭐ Added Smartphone Icon
 
 // Define TypeScript interface
 type LoginFormData = {
@@ -20,8 +23,8 @@ type LoginFormData = {
   password: string;
 };
 
+const API_BASE_URL = 'http://localhost:3046'; //add back env variables
 
-const API_BASE_URL =  'http://localhost:3046'; //add back env variables
 // Schema definition
 const loginSchema = z.object({  
   email: z.string().email("Email is required"),
@@ -45,39 +48,25 @@ export default function LoginPage() {
     }
   });
 
+  const isMobileOrTablet = checkIsPhone();
+
   const onSubmit = async (data: LoginFormData) => {
-    
-    
     try {
       const res = await axios.post(`${API_BASE_URL}/api/v1/login`, data, {
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true //
+        withCredentials: true 
       });
       
-      
-      
-      // Success case
       setLoginStatus(res.data.message);
-    //   toast.success("Login successful!");
-      
-      
       localStorage.setItem('user', JSON.stringify(res.data.user));
-
       
-    
-      
-       setTimeout(() => {
-      router.push("/profile");
-    }, 5000);
+      setTimeout(() => {
+        router.push("/profile");
+      }, 5000);
       reset();
       
     } catch (e: any) {
-   
-      
-      // Handle different error cases
       if (e.response) {
-   
-        
         switch (e.response.status) {
           case 404:
             setLoginStatus(e.response.data.message || 'User not found');
@@ -95,10 +84,8 @@ export default function LoginPage() {
             setLoginStatus(e.response.data?.message || e.response.data);
         }
       } else if (e.request) {
-        
         setLoginStatus('No response from server. Check if backend is running.');
       } else {
-        
         setLoginStatus('Network error. Please check your connection.');
       }
     }
@@ -152,15 +139,34 @@ export default function LoginPage() {
               </button>
             </form>
             
-            <p className='text-white text-center mt-4 text-sm sm:text-base'>
-              Haven't signed up?  
-              <Link 
-                href="/signup"
-                className='text-amber-300 hover:text-amber-200 hover:underline ml-1 transition-colors duration-200'
-              >
-                <u>Sign up</u>
-              </Link>
-            </p>
+            {/* ⭐ Mobile Signup Link */}
+            {isMobileOrTablet && (
+              <p className="text-white text-center mt-4 text-sm sm:text-base">
+                Haven't signed up?  
+                <Link 
+                  href="/signup"
+                  className="text-amber-300 hover:text-amber-200 hover:underline ml-1 transition-colors duration-200"
+                >
+                  <u>Sign up</u>
+                </Link>
+              </p>
+            )}
+
+            {/* ⭐ NEW: Desktop Note */}
+            {!isMobileOrTablet && (
+              <div className="mt-6 p-4 bg-blue-900/50 rounded-lg border border-white/20 flex items-start gap-3">
+                <SmartphoneIcon className="w-5 h-5 text-amber-300 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-white text-sm font-medium">
+                    New here? You need a mobile device.
+                  </p>
+                  <p className="text-white/70 text-xs mt-1">
+                    For security reasons, account creation is only available on the mobile app. Please sign up  on your phone, then return here to log in.
+                  </p>
+                </div>
+              </div>
+            )}
+
           </div>
 
           {loginStatus && (
@@ -219,8 +225,6 @@ export default function LoginPage() {
               </a>
               
             </div>
-            
-           
             
             {/* Copyright */}
             <p className="text-white/60 text-xs text-center mt-4 pt-4 border-t border-white/10">

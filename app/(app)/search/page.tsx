@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { getUserData } from '../message/[userId]/page';
+import { useStatusStore } from '@/stores/statusStore';
 
 // Dynamically import Lucide icons
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search), { ssr: false });
@@ -50,16 +52,74 @@ const UserCard = ({ user }: { user: User;  }) => {
     });
   };
 
-  const handleMessageClick = () => {
-    // Navigate to chat with this user
-    console.log("🔵 Attempting to navigate to user:", user.id)
-    router.push(`/message/${user.id}`);
+  const handleMessageClick = async () => {
+  try {
+    const userData = getUserData();
     
-    // Or you could:
-    // 1. Open a chat modal
-    // 2. Initialize a new conversation
-    // 3. Trigger a messaging API call
-  };
+    if (!userData?.id) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    if (userData.id === user.id) {
+      console.error('Cannot message yourself');
+      return;
+    }
+
+    console.log("🔵 Creating/Getting conversation with user:", user.id);
+    
+    // ✅ Fix: Remove colon and use template literal correctly
+    const response = await axios.post(
+      `${API_BASE_URL}/api/v1/conversations/with/${user.id}`,
+      {
+        userId1: userData.id
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        
+        }
+      }
+    );
+
+     if (response.data.success) {
+      // ✅ Get the conversation from response
+      const newConversation = response.data.conversation;
+      
+      // ✅ Transform the conversation to match your store's Conversation type
+      const transformedConversation = {
+        userId: user.id, // or newConversation.participants.find(p => p.id !== userData.id).id
+        name: user.name || user.username,
+        lastMessage: newConversation.lastMessage?.content || 'No messages yet',
+        avatar: user.avatar || null,
+        timestamp: newConversation.lastMessageAt ? new Date(newConversation.lastMessageAt) : new Date(),
+        unreadCount: 0,
+        conversationId: newConversation._id || newConversation.id
+      };
+      
+      // ✅ Add conversation to store
+      const { addConversation } = useStatusStore.getState();
+      addConversation(transformedConversation);
+      
+      console.log("✅ Conversation added to store:", transformedConversation);
+      
+      // ✅ Navigate to chat
+      router.push(`/message/${user.id}`);
+    } else {
+      console.error("❌ Failed to create conversation:", response.data.error);
+      alert(response.data.error || 'Failed to start conversation');
+    }
+    
+    // Navigate to chat with this user
+    
+    
+  } catch (error) {
+    console.error("❌ Error creating/getting conversation:", error);
+    
+    // Handle different error cases
+    
+  }
+};
 
  
 
@@ -336,7 +396,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
 
   const getSearchTips = () => {
     if (searchQuery.length === 0) {
-      return "Try searching by name, username, or email address";
+      return "Try searching by name or username";
     }
     
     if (searchQuery.length === 1) {
@@ -347,7 +407,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
   };
 
   return (
-    <div className="h-full bg-gradient-to-br from-blue-50 to-purple-50 p-4 lg:p-8">
+    <div className="h-full bg-gradient-to-br from-blue-50 to-purple-50 p-4 lg:p-8 ">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-start mb-4">
@@ -356,7 +416,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
               Find People
             </h1>
             <p className="text-gray-600 mt-1">
-              Search by name, username, or email
+              Search by name or username
             </p>
           </div>
           
@@ -376,7 +436,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search by name, username, or email..."
+            placeholder="Search by name or username"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-12 py-3 bg-white border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent text-black transition-all text-lg"
@@ -469,7 +529,7 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
                 <p>💡 Search tips:</p>
                 <p>• Use full name or partial name</p>
                 <p>• Try username with or without @</p>
-                <p>• Search by email address</p>
+                
               </div>
             </div>
           )
@@ -477,43 +537,45 @@ export default function SearchPage({ currentUser, onStartChat }: SearchUserProps
 
         {/* Initial State - Before Search */}
         {!searchQuery && !isLoading && !error && (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 mx-auto mb-8 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-              <SearchIcon className="w-12 h-12 text-blue-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Connect with People
-            </h3>
-            <p className="text-gray-600 max-w-lg mx-auto mb-8 text-lg">
-              Find users by their name, username, or email address 
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <div className="p-4 bg-white rounded-xl border border-blue-100">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
-                  <UserIcon className="w-6 h-6 text-blue-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Search by Name</h4>
-                <p className="text-sm text-gray-600">Find users by their full or partial name</p>
-              </div>
-              
-              <div className="p-4 bg-white rounded-xl border border-blue-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
-                  <span className="text-purple-600 font-bold">@</span>
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Search by Username</h4>
-                <p className="text-sm text-gray-600">Find users by their unique username</p>
-              </div>
-              
-              <div className="p-4 bg-white rounded-xl border border-blue-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
-                  <MailIcon className="w-6 h-6 text-green-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Search by Email</h4>
-                <p className="text-sm text-gray-600">Find users by their email address</p>
-              </div>
-            </div>
-          </div>
+          <div className="text-center py-8 md:py-12">
+  <div className="w-24 h-24 mx-auto mb-6 md:mb-8 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+    <SearchIcon className="w-12 h-12 text-blue-400" />
+  </div>
+  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-4">
+    Connect with People
+  </h3>
+  <p className="text-gray-600 max-w-lg mx-auto mb-6 md:mb-8 text-base md:text-lg">
+    Find users by their name or username
+  </p>
+  
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 max-w-2xl mx-auto px-4">
+    {/* Search by Name */}
+    <div className="p-4 md:p-6 bg-white rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
+      <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-3 mx-auto">
+        <UserIcon className="w-6 h-6 text-blue-600" />
+      </div>
+      <h4 className="font-semibold text-gray-900 mb-2 text-center">Search by Name</h4>
+      <p className="text-sm text-gray-600 text-center">Find users by their full or partial name</p>
+      <div className="mt-3 flex justify-center">
+        
+      </div>
+    </div>
+    
+    {/* Search by Username */}
+    <div className="p-4 md:p-6 bg-white rounded-xl border-2 border-purple-100 hover:border-purple-300 hover:shadow-lg transition-all duration-200">
+      <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center mb-3 mx-auto">
+        <span className="text-purple-600 font-bold text-xl">@</span>
+      </div>
+      <h4 className="font-semibold text-gray-900 mb-2 text-center">Search by Username</h4>
+      <p className="text-sm text-gray-600 text-center">Find users by their unique username</p>
+      <div className="mt-3 flex justify-center">
+        
+      </div>
+    </div>
+  </div>
+  
+  
+</div>
         )}
       </div>
     </div>

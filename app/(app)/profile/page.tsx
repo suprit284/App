@@ -5,6 +5,7 @@ import { Mail, User as UserIcon, AlertCircle, Edit2, Check, X } from 'lucide-rea
 import Image from 'next/image';
 import { toast, Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 
 interface User {
@@ -158,6 +159,32 @@ export default function ProfilePage() {
     fetchUserData();
   }, [fetchUserData]);
 
+  useEffect(() => {
+    const setUserOnline = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          router.push('/login');
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        
+        // ✅ Set user online
+       
+        
+       
+        
+        
+      } catch (error) {
+        console.error('❌ Failed to set user online:', error);
+        
+       
+      }
+    };
+
+    setUserOnline();
+  }, []);
   // Handle save changes
   const handleSave = useCallback(async () => {
     if (!editedUser || !user) return;
